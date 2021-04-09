@@ -2,7 +2,7 @@ import pandas as pd
 import geopandas as gpd
 
 # load health region boundary data
-health_regions = gpd.read_file('./data/health-units/lhrp000b06a_e_Oct2011.shp')
+health_regions = gpd.read_file('./data/health-units/lhrp000b06a_e_Oct2011.shp').rename(columns={'PR_HRUID': 'HR_UID'})
 
 # load health region mappings
 health_region_mappings = pd.read_csv('./data/covid-data/other/hr_map.csv')
