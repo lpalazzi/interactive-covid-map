@@ -8,9 +8,11 @@ import webbrowser
 
 # load health region boundary data
 health_regions = gpd.read_file('./data/health-regions/RegionalHealthBoundaries.shp')[['HR_UID', 'geometry']].set_index('HR_UID')
+health_regions.index = health_regions.index.astype('int64').astype('str')
 
 # load health region mappings
 health_region_mappings = pd.read_csv('./data/covid-data/other/hr_map.csv')
+health_region_mappings['HR_UID'] = health_region_mappings['HR_UID'].astype('int64').astype('str')
 
 # load covid data
 covid_data_2020 = pd.read_csv('./data/covid-data/individual_level/cases_2020.csv')
@@ -30,10 +32,9 @@ covid_data['report_week'] = pd.to_datetime(covid_data['report_week'], format='%d
 
 # sum over health regions
 covid_data_sums = covid_data['HR_UID'].value_counts()
-covid_data_sums.index = covid_data_sums.index.astype('O')
 
 # init map
-m = folium.Map(location=[56.130, -106.35], tiles='cartodbpositron', zoom_start=4)
+m = folium.Map(location=[56.130, -106.35], tiles='cartodbpositron', zoom_start=4, prefer_canvas=True)
 
 # plot total case count by health region
 folium.Choropleth(geo_data=health_regions.__geo_interface__,
