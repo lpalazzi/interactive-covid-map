@@ -1,21 +1,16 @@
 import os
 import webbrowser
 import folium
+from folium.plugins import TimeSliderChoropleth
 
-from load_data import health_regions, covid_timeseries
+from load_data import health_regions, style_dict, cmap
 
-# init map
-m = folium.Map(location=[56.130, -106.35], tiles='cartodbpositron', zoom_start=4, prefer_canvas=True)
+m = folium.Map(location=[56.130, -106.35], tiles='cartodbpositron', zoom_start=4, max_bounds=True)
 
-# plot total case count by health region
-folium.Choropleth(geo_data=health_regions.__geo_interface__,
-                  # data=covid_data_sums,
-                  key_on='feature.id',
-                  fill_color="OrRd",
-                #   fill_opacity=0.7,
-                #   line_opacity=1.0,
-                  legend_name='Total COVID-19 Cases',
-                  ).add_to(m)
+s = TimeSliderChoropleth(data=health_regions.to_json(), styledict=style_dict).add_to(m)
+
+cmap.caption = 'Number of daily confirmed cases'
+l = cmap.add_to(m)
 
 # render map
 filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, 'output/map.html')

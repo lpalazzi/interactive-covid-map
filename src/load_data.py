@@ -1,7 +1,8 @@
 import os
-
+import numpy as np
 import pandas as pd
 import geopandas as gpd
+import branca.colormap as cm
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
@@ -36,3 +37,24 @@ covid_timeseries['date_report'] = pd.to_datetime(covid_timeseries['date_report']
 
 # sort based on health region
 covid_timeseries = covid_timeseries.sort_values(['HR_UID', 'date_report']).reset_index(drop=True)
+
+# use log of cases to plot colours
+covid_timeseries['cases_log'] = np.log10(covid_timeseries['cases'])
+
+# convert date to string
+covid_timeseries['date_report_sec'] = covid_timeseries['date_report'].astype(int) / 10**9
+covid_timeseries['date_report_sec'] = covid_timeseries['date_report_sec'].astype(int).astype(str)
+
+# map daily cases to colour
+cmap = cm.linear.YlOrRd_09.scale(0, max(covid_timeseries['cases_log']))
+covid_timeseries['colour'] = covid_timeseries['cases_log'].map(cmap)
+cmap = cm.linear.YlOrRd_09.scale(0, max(covid_timeseries['cases']))
+
+# generate style dictionary for time slider
+style_dict = {}
+for HR_UID in hr_map.HR_UID:
+    df = covid_timeseries[covid_timeseries['HR_UID'] == HR_UID]
+    inner_dict = {}
+    for _, row in df.iterrows():
+        inner_dict[row['date_report_sec']] = {'color': row['colour'], 'opacity': 0.8}
+    style_dict[str(HR_UID)] = inner_dict
